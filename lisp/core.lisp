@@ -46,10 +46,24 @@
 
 ;; ========================================================
 ;; FUNCIÓN: auditoria
-;; NATURALEZA: 
-;; ESTRATEGIA: 
-;; IMPACTO: 
+;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
+;; ESTRATEGIA: Selección por casos (compara colores mediante cond)
+;; IMPACTO: No destructiva (No modifica estructuras en memoria)
 ;; ========================================================
+
+(defun auditoria (epoch)
+  (let ((color-anterior (timer (- epoch 1)))
+        (color-actual   (timer epoch)))
+    (cond
+      ((not (equal color-anterior color-actual))
+       (format t "Tiempo ~A: la luz ha cambiado de ~A a ~A~%"
+               epoch
+               color-anterior
+               color-actual))))
+)
+
+;(auditoria (get-universal-time)) para llamarla con tiempo Epoch,
+;Si no imprime nada  es porque no era momento de cambio
 
 ;; ========================================================
 ;; FUNCIÓN: duracion-ciclo
