@@ -91,11 +91,23 @@
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
-;; NATURALEZA: 
-;; ESTRATEGIA: 
-;; IMPACTO: 
+;; NATURALEZA: Pura
+;; ESTRATEGIA: Selección por casos (cond)
+;; IMPACTO: No destructiva
 ;; ========================================================
+;;| La función 'recomendacion-ciclo' evalúa la duración del ciclo en segundos y proporciona recomendaciones basadas en rangos específicos.
+(defun recomendacion-ciclo(duracion)
+  (cond
+    ((< duracion 35)
+     "Se recomienda aumentar la duración del ciclo.")
 
+    ((> duracion 150)
+     "Se recomienda reducir la duración del ciclo.")
+
+    (t
+     "La duración del ciclo se encuentra dentro del rango recomendado.")
+    )
+)
 ;; ========================================================
 ;; FUNCIÓN: ciclos-por-tiempo:
 ;; NATURALEZA: Pura (dado el mismo valor en minutos, devuelve el mismo valor matematico)
