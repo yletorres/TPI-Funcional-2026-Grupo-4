@@ -75,10 +75,19 @@
 
 ;; ========================================================
 ;; FUNCIÓN: duracion-ciclo
-;; NATURALEZA: 
-;; ESTRATEGIA: 
-;; IMPACTO: 
+;; NATURALEZA: Pura(dado su entrada en segundos solo devuelve el mismo valor matematico, 
+;;en este caso el valor de los segundos)
+;; ESTRATEGIA: Recibe la entrada en segundos y la dividimos por 216 
+;; IMPACTO: No destructiva
 ;; ========================================================
+
+
+(defun duracion-ciclo (segundos)
+  ;; Calcula la cantidad de ciclos semafóricos completos en un período dado en segundos.
+  ;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
+  ;; dejando solo la cantidad de ciclos enteros completados.
+  (truncate (/ segundos 216))
+  )
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
@@ -89,10 +98,18 @@
 
 ;; ========================================================
 ;; FUNCIÓN: ciclos-por-tiempo:
-;; NATURALEZA: 
-;; ESTRATEGIA: 
-;; IMPACTO: 
+;; NATURALEZA: Pura (dado el mismo valor en minutos, devuelve el mismo valor matematico)
+;; ESTRATEGIA:trasformacion de valores y calculos matematicos directos  
+;; IMPACTO: No destructiva
 ;; ========================================================
+(defun ciclos-por-tiempo (minutos)
+  ;;Calcula la cantidad de ciclos semafóricos completos en un período dado en minutos.
+  ;; Se multiplican los minutos por 60 para convertirlos a segundos.
+  ;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
+  ;; dejando solo la cantidad de ciclos enteros completados.
+  (truncate (/ (* minutos 60) 216))
+  )
+
 
 ;; ========================================================
 ;; FUNCIÓN: distribucion-hora
