@@ -125,17 +125,25 @@
 
 ;; ========================================================
 ;; FUNCIÓN: distribucion-hora
-;; NATURALEZA: 
-;; ESTRATEGIA: 
-;; IMPACTO: 
+;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
+;; ESTRATEGIA: Calculo aritmetico directo sobre los parametros de entrada,
+;;             seguido de impresión formateada.
+;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
-
 (defun distribucion-hora (rojo verde amarillo)
-  (Let (ciclo (+ rojo amarillo verde))
-    ()
-
+  (let ((total (+ rojo verde amarillo)))
+    (format t "=== Distribucion Temporal (1 hora) ===~%")
+    (format t "Rojo:     ~,2F%~%" (* (/ (float rojo)     total) 100))
+    (format t "Verde:    ~,2F%~%" (* (/ (float verde)    total) 100))
+    (format t "Amarillo: ~,2F%~%" (* (/ (float amarillo) total) 100))
   )
 )
+
+;; Calcula e imprime el porcentaje de tiempo que ocupa cada color
+;; en un ciclo semaforico, dado que se conocen las duraciones en segundos.
+;; El total del ciclo es la suma de las tres duraciones recibidas.
+;; Cada porcentaje se obtiene dividiendo la duracion del color por el total
+;; y multiplicando por 100. Se usa float para obtener decimales en lugar de fracciones.
 
 
 ;; ###################### IMPLEMENTACION QUICKLISP ######################
