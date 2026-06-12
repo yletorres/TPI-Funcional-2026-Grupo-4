@@ -83,13 +83,15 @@
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
+;MODIFICAR
 
 (defun duracion-ciclo (segundos)
-  ;; Calcula la cantidad de ciclos semafóricos completos en un período dado en segundos.
-  ;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
-  ;; dejando solo la cantidad de ciclos enteros completados.
   (truncate (/ segundos 216))
   )
+
+;; Calcula la cantidad de ciclos semafóricos completos en un período dado en segundos.
+;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
+;; dejando solo la cantidad de ciclos enteros completados.
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
@@ -133,6 +135,8 @@
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
 
+;MODIFICAR
+
 (defun distribucion-hora (rojo verde amarillo)
   (let ((total (+ rojo verde amarillo)))
     (format t "=== Distribucion Temporal (1 hora) ===~%")
@@ -159,13 +163,6 @@
 
 ;; RECORDAR DEFINIR TIMER PARA LLAMAR A auditoria-quicklisp
 
-;; ========================================================
-;; FUNCIÓN: auditoria-quicklisp
-;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: Selección por condición (Compara colores mediante if y formatea timestamp con local-time)
-;; IMPACTO: No destructiva (No modifica estructuras en memoria)
-;; ========================================================
-
 (shadow 'timer)
 
 (defun timer (timestamp)
@@ -180,6 +177,12 @@
 
 ;Copia exacta de la funcion timer definida anteriormente
 
+;; ========================================================
+;; FUNCIÓN: auditoria-quicklisp
+;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
+;; ESTRATEGIA: Selección por condición (Compara colores mediante if y formatea timestamp con local-time)
+;; IMPACTO: No destructiva (No modifica estructuras en memoria)
+;; ========================================================
 
 (ql:quickload "local-time")
 
@@ -199,9 +202,6 @@
     )
   )
 )
-
-;; Cargo la librería y modifico sólo el argumento timestamp
-;; Para formatearla.
 
 ;; ========================================================
 ;; CASOS DE PRUEBA
@@ -273,21 +273,43 @@
 ;; ========================================================
 
 ;; ========================================================
-;; FUNCIÓN: Transicion
+;; FUNCIÓN: Transicion2   
 ;; NATURALEZA: Pura (dados los mismos argumentos siempre devuelve el mismo resultado)
 ;; ESTRATEGIA: Selección por casos (evalua el par de estados mediante cond)
 ;; IMPACTO: No destructiva (No modifica estructuras existentes) 
 ;; ========================================================
 
-(defun transicion2 (color-actual cambiar-a)
+  (defun transicion2 (color-actual cambiar-a)
   (cond
-    ((and (equal color-actual 'en-rojo) (equal cambiar-a 'verde))
+
+    ;; rojo a rojo-intermitente (aviso antes de pasar a verde)
+    ((and (equal color-actual 'en-rojo)
+          (equal cambiar-a 'en-rojo-intermitente))
+     (list color-actual "cambiar-a-rojo-intermitente"))
+
+    ;; rojo-intermitente a Verde
+    ((and (equal color-actual 'en-rojo-intermitente)
+          (equal cambiar-a 'verde))
      (list color-actual "cambiar-a-verde"))
 
-    ((and (equal color-actual 'en-verde) (equal cambiar-a 'amarillo))
+    ;; verde a verde-intermitente (aviso antes de pasar a amarillo)
+    ((and (equal color-actual 'en-verde)
+          (equal cambiar-a 'en-verde-intermitente))
+     (list color-actual "cambiar-a-verde-intermitente"))
+
+    ;; verde-intermitente a amarillo
+    ((and (equal color-actual 'en-verde-intermitente)
+          (equal cambiar-a 'amarillo))
      (list color-actual "cambiar-a-amarillo"))
 
-    ((and (equal color-actual 'en-amarillo) (equal cambiar-a 'rojo))
+    ;; amarillo a amarillo-intermitente (aviso antes de pasar a rojo)
+    ((and (equal color-actual 'en-amarillo)
+          (equal cambiar-a 'en-amarillo-intermitente))
+     (list color-actual "cambiar-a-amarillo-intermitente"))
+
+    ;; amarillo-intermitente a rojo
+    ((and (equal color-actual 'en-amarillo-intermitente)
+          (equal cambiar-a 'rojo))
      (list color-actual "cambiar-a-rojo"))
 
     (t (list color-actual 'accion-por-defecto))
@@ -295,24 +317,27 @@
 )
 
 ;; ========================================================
-;; FUNCIÓN: timer
+;; FUNCIÓN: timer2
 ;; NATURALEZA: Pura (dado el mismo timestamp, siempre retorna el mismo color)
 ;; ESTRATEGIA: Selección por casos (evalua el rango del ciclo mediante cond)
 ;; IMPACTO: No destructiva (retorna un símbolo sin modificar estructuras existentes)
 ;; ========================================================
 
 (defun timer2 (timestamp)
-  (let ((ciclo (mod timestamp 216)))
+  (let ((ciclo (mod timestamp 225)))   ;; 216 pasa a 225
     (cond
       ((< ciclo 90)  'en-rojo)
-      ((< ciclo 210) 'en-verde)
-      (t             'en-amarillo)
+      ((< ciclo 93)  'en-rojo-intermitente)
+      ((< ciclo 213) 'en-verde)
+      ((< ciclo 216) 'en-verde-intermitente)
+      ((< ciclo 222) 'en-amarillo)
+      (t             'en-amarillo-intermitente)
     )
   )
 )
 
 ;; ========================================================
-;; FUNCIÓN: auditoria
+;; FUNCIÓN: auditoria2
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
 ;; ESTRATEGIA: Selección por condición (Compara colores mediante if)
 ;; IMPACTO: No destructiva (No modifica estructuras en memoria)
@@ -330,6 +355,8 @@
   )
 )
 
+;; Sin cambios respecto a auditoria: solo se reemplaza timer por timer2.
+
 ;; ========================================================
 ;; FUNCIÓN: duracion-ciclo
 ;; NATURALEZA: Pura(dado su entrada en segundos solo devuelve el mismo valor matematico, 
@@ -338,10 +365,11 @@
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
+;pendiente, MODIFICAR
 
 (defun duracion-ciclo2 (segundos)
-  (truncate (/ segundos 216))
-  )
+  (truncate (/ segundos 225)) ;; 216 pasa a 225
+)
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
@@ -358,7 +386,7 @@
   )
 )
 
-;; NO HAY CAMBIOS
+;; Sin cambios respecto a recomendacion-ciclo
 
 ;; ========================================================
 ;; FUNCIÓN: ciclos-por-tiempo:
@@ -366,6 +394,8 @@
 ;; ESTRATEGIA: trasformacion de valores y calculos matematicos directos  
 ;; IMPACTO: No destructiva
 ;; ========================================================
+
+;pendiente
 
 (defun ciclos-por-tiempo2 (minutos)
   (truncate (/ (* minutos 60) 216))
@@ -378,6 +408,8 @@
 ;;             seguido de impresión formateada.
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
+
+;pendiente, MODIFICAR
 
 (defun distribucion-hora2 (rojo verde amarillo)
   (let ((total (+ rojo verde amarillo)))
@@ -399,6 +431,8 @@
 ;; IMPACTO: No destructiva (No modifica estructuras en memoria)
 ;; ========================================================
 
+;pendiente
+
 (ql:quickload "local-time")
 
 (defun auditoria-quicklisp2 (timestamp)
@@ -412,11 +446,12 @@
                           " " (:hour 2) ":" (:min 2) ":" (:sec 2))
 
               )
-              color-anterior
+              color-anterior  
               color-actual)
     )
   )
 )
+;; Sin cambios respecto a auditoria-quicklisp: solo se reemplaza timer por timer2.
 
 ;; ========================================================
 ;; Extension 2 
