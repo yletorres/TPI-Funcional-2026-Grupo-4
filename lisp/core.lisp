@@ -192,3 +192,64 @@
 
 ;; Cargo la librería y modifico sólo el argumento timestamp
 ;; Para formatearla.
+
+;; ========================================================
+;; CASOS DE PRUEBA
+;; ASEGURAMIENTO DE LA CALIDAD 
+;; ========================================================
+
+;; TRANSICION
+;; Normal:
+;; (transicion 'en-rojo 'verde)
+;; Alternativo:
+;; (transicion 'en-verde 'amarillo)
+;; Error:
+;; (transicion 10 'verde)
+
+;; TIMER
+;; Normal:
+;; (timer 50)
+;; Alternativo:
+;; (timer 200)
+;; Error:
+;; (timer "hola")
+
+;; AUDITORIA
+;; Normal:
+;; (auditoria 90)
+;; Alternativo:
+;; (auditoria 50)
+;; Error:
+;; (auditoria "abc")
+
+;; DURACION-CICLO
+;; Normal:
+;; (duracion-ciclo 432)
+;; Alternativo:
+;; (duracion-ciclo 216)
+;; Error:
+;; (duracion-ciclo "texto")
+
+;; RECOMENDACION-CICLO
+;; Normal:
+;; (recomendacion-ciclo 20)
+;; Alternativo:
+;; (recomendacion-ciclo 100)
+;; Error:
+;; (recomendacion-ciclo "error")
+
+;; CICLOS-POR-TIEMPO
+;; Normal:
+;; (ciclos-por-tiempo 15)
+;; Alternativo:
+;; (ciclos-por-tiempo 30)
+;; Error:
+;; (ciclos-por-tiempo "quince")
+
+;; DISTRIBUCION-HORA
+;; Normal:
+;; (distribucion-hora 90 120 6)
+;; Alternativo:
+;; (distribucion-hora 30 30 30)
+;; Error:
+;; (distribucion-hora "rojo" 120 6)
