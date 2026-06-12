@@ -34,6 +34,8 @@
 ;; IMPACTO: No destructiva (retorna un símbolo sin modificar estructuras existentes)
 ;; ========================================================
 
+(shadow 'timer) ;Para la llamada en sbcl
+
 (defun timer (timestamp)
   (let ((ciclo (mod timestamp 216)))
     (cond
@@ -155,24 +157,29 @@
 ;; Evita conflicto con el símbolo TIMER definido en SBCL (paquete SB-EXT).
 ;; Se crea un símbolo local para mantener el nombre exigido por la consigna.
 
-(shadow 'timer)
+;; RECORDAR DEFINIR TIMER PARA LLAMAR A auditoria-quicklisp
 
-;; Copia exacta de la funcion timer definida anteriormente.
+;; ========================================================
+;; FUNCIÓN: auditoria-quicklisp
+;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
+;; ESTRATEGIA: Selección por condición (Compara colores mediante if y formatea timestamp con local-time)
+;; IMPACTO: No destructiva (No modifica estructuras en memoria)
+;; ========================================================
+
+(shadow 'timer)
 
 (defun timer (timestamp)
   (let ((ciclo (mod timestamp 216)))
     (cond
       ((< ciclo 90)  'en-rojo)
       ((< ciclo 210) 'en-verde)
-      (t             'en-amarillo)))
+      (t             'en-amarillo)
+    )
+  )
 )
 
-;; ========================================================
-;; FUNCIÓN: auditoria-quicklisp
-;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: No destructiva (No modifica estructuras en memoria)
-;; IMPACTO: No destructiva (No modifica estructuras en memoria)
-;; ========================================================
+;Copia exacta de la funcion timer definida anteriormente
+
 
 (ql:quickload "local-time")
 
@@ -272,7 +279,7 @@
 ;; IMPACTO: No destructiva (No modifica estructuras existentes) 
 ;; ========================================================
 
-(defun transicion (color-actual cambiar-a)
+(defun transicion2 (color-actual cambiar-a)
   (cond
     ((and (equal color-actual 'en-rojo) (equal cambiar-a 'verde))
      (list color-actual "cambiar-a-verde"))
@@ -294,7 +301,7 @@
 ;; IMPACTO: No destructiva (retorna un símbolo sin modificar estructuras existentes)
 ;; ========================================================
 
-(defun timer (timestamp)
+(defun timer2 (timestamp)
   (let ((ciclo (mod timestamp 216)))
     (cond
       ((< ciclo 90)  'en-rojo)
@@ -311,9 +318,9 @@
 ;; IMPACTO: No destructiva (No modifica estructuras en memoria)
 ;; ========================================================
 
-(defun auditoria (timestamp)
-  (let ((color-anterior (timer (- timestamp 1)))
-        (color-actual   (timer timestamp)))
+(defun auditoria2 (timestamp)
+  (let ((color-anterior (timer2 (- timestamp 1)))
+        (color-actual   (timer2 timestamp)))
     (if (not (equal color-anterior color-actual))
       (format t "Tiempo ~A: la luz ha cambiado de ~A a ~A~%" 
               timestamp
@@ -332,7 +339,7 @@
 ;; ========================================================
 
 
-(defun duracion-ciclo (segundos)
+(defun duracion-ciclo2 (segundos)
   (truncate (/ segundos 216))
   )
 
@@ -343,7 +350,7 @@
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
-(defun recomendacion-ciclo (duracion)
+(defun recomendacion-ciclo2 (duracion)
   (cond
     ((< duracion 35) (print "Se recomienda aumentar la duración del ciclo."))
     ((> duracion 150) (print "Se recomienda reducir la duración del ciclo."))
@@ -360,7 +367,7 @@
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
-(defun ciclos-por-tiempo (minutos)
+(defun ciclos-por-tiempo2 (minutos)
   (truncate (/ (* minutos 60) 216))
 )
 
@@ -372,7 +379,7 @@
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
 
-(defun distribucion-hora (rojo verde amarillo)
+(defun distribucion-hora2 (rojo verde amarillo)
   (let ((total (+ rojo verde amarillo)))
     (format t "=== Distribucion Temporal (1 hora) ===~%")
     (format t "Rojo:     ~,2F%~%" (* (/ (float rojo)     total) 100))
@@ -385,34 +392,18 @@
 ;; Nota: No Ejecutar en REPL De Sublime con CLISP sino con SBCL
 ;; Por compatibilidad con QUICKLISP
 
-
-;; Evita conflicto con el símbolo TIMER definido en SBCL (paquete SB-EXT).
-;; Se crea un símbolo local para mantener el nombre exigido por la consigna.
-
-(shadow 'timer)
-
-;; Copia exacta de la funcion timer definida anteriormente.
-
-(defun timer (timestamp)
-  (let ((ciclo (mod timestamp 216)))
-    (cond
-      ((< ciclo 90)  'en-rojo)
-      ((< ciclo 210) 'en-verde)
-      (t             'en-amarillo)))
-)
-
 ;; ========================================================
 ;; FUNCIÓN: auditoria-quicklisp
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: No destructiva (No modifica estructuras en memoria)
+;; ESTRATEGIA: Selección por condición (Compara colores mediante if y formatea timestamp con local-time)
 ;; IMPACTO: No destructiva (No modifica estructuras en memoria)
 ;; ========================================================
 
 (ql:quickload "local-time")
 
-(defun auditoria-quicklisp (timestamp)
-  (let ((color-anterior (timer (- timestamp 1)))
-        (color-actual   (timer timestamp)))
+(defun auditoria-quicklisp2 (timestamp)
+  (let ((color-anterior (timer2 (- timestamp 1)))
+        (color-actual   (timer2 timestamp)))
     (if (not (equal color-anterior color-actual))
       (format t "Tiempo ~A: la luz ha cambiado de ~A a ~A~%" 
               (local-time:format-timestring nil 
@@ -433,9 +424,68 @@
 
 ;; ========================================================
 ;; FUNCIÓN: informe
-;; NATURALEZA: 
-;; ESTRATEGIA: 
-;; IMPACTO: 
+;; NATURALEZA: Impura (produce efectos secundarios: escribe en archivo)
+;; ESTRATEGIA: Selección por condición (escribe en archivo solo si hay transición mediante if)
+;; IMPACTO: No destructiva en memoria, pero modifica el archivo informe-ejecucion-semaforo.txt
 ;; ========================================================
 
+(defun informe (timestamp)
+  (with-open-file (stream "informe-ejecucion-semaforo.txt"
+                          :direction :output
+                          :if-exists :append
+                          :if-does-not-exist :create)
+    (let ((color-anterior (timer (- timestamp 1)))
+          (color-actual   (timer timestamp)))
+      (if (not (equal color-anterior color-actual))
+        (format stream "~A - Transicion: ~A -> ~A~%"
+                (local-time:format-timestring nil
+                  (local-time:unix-to-timestamp timestamp)
+                  :format '((:year 4) "-" (:month 2) "-" (:day 2)
+                            " " (:hour 2) ":" (:min 2) ":" (:sec 2)))
+                color-anterior
+                color-actual)))))
+
+
+;; ========================================================
+;; Extra
+;; ========================================================
+;; Para implementar la persistencia en tiempo real se necesitaron
+;; dos funciones auxiliares:
+;;
+;; - universal-a-unix: convierte el tiempo de Common Lisp a epoch Unix,
+;;   necesario para que local-time pueda formatear la fecha correctamente.
+;;
+;; - ejecutar-sistema: llama a informe cada segundo durante el tiempo
+;;   indicado usando recursividad de cola, evitando bucles imperativos
+;;   y respetando las restricciones de diseño del proyecto.
+;; ========================================================
+
+
+;; ========================================================
+; FUNCIÓN: universal-a-unix
+;; NATURALEZA: Pura (Dado un tiempo universal, siempre retorna el mismo unix timestamp)
+;; ESTRATEGIA: Aplicación aritmética directa (resta constante de conversión entre épocas)
+;; IMPACTO: No destructiva (No modifica estructuras en memoria)
+;; ========================================================
+
+(defun universal-a-unix (tiempo-universal)
+  (- tiempo-universal 2208988800))
+
+;; 2208988800 es la diferencia en segundos entre el epoch de Common Lisp (1 de enero de 1900)
+;; y el epoch Unix (1 de enero de 1970), equivalente a 70 años.
+
+;; ========================================================
+;; FUNCIÓN: ejecutar-sistema
+;; NATURALEZA: Impura (produce efectos secundarios: escribe en archivo, espera con sleep)
+;; ESTRATEGIA: Recursividad de cola (se llama a sí misma decrementando segundos-restantes)
+;; IMPACTO: No destructiva en memoria, pero modifica el archivo informe-ejecucion-semaforo.txt
+;; ========================================================
+
+(defun ejecutar-sistema (segundos-restantes)
+  (cond
+    ((<= segundos-restantes 0) nil)
+    (t
+     (informe (universal-a-unix (get-universal-time)))
+     (sleep 1)
+     (ejecutar-sistema (- segundos-restantes 1))))) 
 
