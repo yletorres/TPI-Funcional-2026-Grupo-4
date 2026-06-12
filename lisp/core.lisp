@@ -361,15 +361,15 @@
 ;; FUNCIÓN: duracion-ciclo
 ;; NATURALEZA: Pura(dado su entrada en segundos solo devuelve el mismo valor matematico, 
 ;;en este caso el valor de los segundos)
-;; ESTRATEGIA: Recibe la entrada en segundos y la dividimos por 216 
+;; ESTRATEGIA: Recibe la entrada en segundos de la duracion de cada color y las suma para obtener la duracion total del ciclo
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
 ;pendiente, MODIFICAR
 
-(defun duracion-ciclo2 (segundos)
-  (truncate (/ segundos 225))
-)
+(defun duracion-ciclo (segundos-rojo segundos-verde segundos-amarillo)
+  (+ segundos-rojo segundos-verde segundos-amarillo)
+  )
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
