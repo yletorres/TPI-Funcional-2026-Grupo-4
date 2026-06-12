@@ -368,7 +368,7 @@
 ;pendiente, MODIFICAR
 
 (defun duracion-ciclo2 (segundos)
-  (truncate (/ segundos 225)) ;; 216 pasa a 225
+  (truncate (/ segundos 225))
 )
 
 ;; ========================================================
@@ -395,10 +395,8 @@
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
-;pendiente
-
 (defun ciclos-por-tiempo2 (minutos)
-  (truncate (/ (* minutos 60) 216))
+  (truncate (/ (* minutos 60) 225)) ;; 216 pasa a 225
 )
 
 ;; ========================================================
@@ -425,13 +423,12 @@
 ;; Por compatibilidad con QUICKLISP
 
 ;; ========================================================
-;; FUNCIÓN: auditoria-quicklisp
+;; FUNCIÓN: auditoria-quicklisp2
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
 ;; ESTRATEGIA: Selección por condición (Compara colores mediante if y formatea timestamp con local-time)
 ;; IMPACTO: No destructiva (No modifica estructuras en memoria)
 ;; ========================================================
 
-;pendiente
 
 (ql:quickload "local-time")
 
