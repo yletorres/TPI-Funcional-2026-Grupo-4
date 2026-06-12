@@ -87,7 +87,7 @@
 
 (defun duracion-ciclo (segundos)
   (truncate (/ segundos 216))
-  )
+)
 
 ;; Calcula la cantidad de ciclos semafóricos completos en un período dado en segundos.
 ;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
