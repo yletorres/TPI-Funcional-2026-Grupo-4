@@ -130,15 +130,14 @@
 ;; ========================================================
 ;; FUNCIÓN: distribucion-hora
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: Calculo aritmetico directo sobre los parametros de entrada,
-;;             seguido de impresión formateada.
+;; ESTRATEGIA: Calculo aritmetico,seguido de impresión formateada.
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
-
-;MODIFICAR
-
-(defun distribucion-hora (rojo verde amarillo)
-  (let ((total (+ rojo verde amarillo)))
+(defun distribucion-hora ()
+  (let* ((rojo     90)
+         (verde    120)
+         (amarillo 6)
+         (total    (+ rojo verde amarillo)))
     (format t "=== Distribucion Temporal (1 hora) ===~%")
     (format t "Rojo:     ~,2F%~%" (* (/ (float rojo)     total) 100))
     (format t "Verde:    ~,2F%~%" (* (/ (float verde)    total) 100))
@@ -147,8 +146,8 @@
 )
 
 ;; Calcula e imprime el porcentaje de tiempo que ocupa cada color
-;; en un ciclo semaforico, dado que se conocen las duraciones en segundos.
-;; El total del ciclo es la suma de las tres duraciones recibidas.
+;; en un ciclo semaforico, usando las duraciones definidas por las reglas del negocio.
+;; El total del ciclo es la suma de las tres duraciones internas 
 ;; Cada porcentaje se obtiene dividiendo la duracion del color por el total
 ;; y multiplicando por 100. Se usa float para obtener decimales en lugar de fracciones.
 
@@ -402,15 +401,14 @@
 ;; ========================================================
 ;; FUNCIÓN: distribucion-hora
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: Calculo aritmetico directo sobre los parametros de entrada,
-;;             seguido de impresión formateada.
+;; ESTRATEGIA: Calculo aritmetico,seguido de impresión formateada.
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
-
-;pendiente, MODIFICAR
-
-(defun distribucion-hora2 (rojo verde amarillo)
-  (let ((total (+ rojo verde amarillo)))
+(defun distribucion-hora2 ()
+  (let* ((rojo     90)
+         (verde    120)
+         (amarillo 6)
+         (total    (+ rojo verde amarillo)))
     (format t "=== Distribucion Temporal (1 hora) ===~%")
     (format t "Rojo:     ~,2F%~%" (* (/ (float rojo)     total) 100))
     (format t "Verde:    ~,2F%~%" (* (/ (float verde)    total) 100))
