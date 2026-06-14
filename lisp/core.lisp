@@ -51,6 +51,8 @@
 ;; al implementarlo con MOD funciona tambien ciclicamente para fechas anteriores
 ;; Es decir, utilizando timestamps negativos.
 
+;Hardcodeado con las reglas del negocio actuales respetando la consigna.
+
 ;; ========================================================
 ;; FUNCIÓN: auditoria
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
@@ -77,21 +79,17 @@
 
 ;; ========================================================
 ;; FUNCIÓN: duracion-ciclo
-;; NATURALEZA: Pura(dado su entrada en segundos solo devuelve el mismo valor matematico, 
-;;en este caso el valor de los segundos)
-;; ESTRATEGIA: Recibe la entrada en segundos y la dividimos por 216 
+;; NATURALEZA: Pura (A mismas entradas, misma salida)
+;; ESTRATEGIA: Calculo Aritmetico 
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
-;MODIFICAR
+(defun duracion-ciclo (segundos-rojo segundos-verde segundos-amarillo)
+  (+ segundos-rojo segundos-verde segundos-amarillo)
+  )
 
-(defun duracion-ciclo (segundos)
-  (truncate (/ segundos 216))
-)
-
-;; Calcula la cantidad de ciclos semafóricos completos en un período dado en segundos.
-;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
-;; dejando solo la cantidad de ciclos enteros completados.
+;; Calcula la duración total de un ciclo semafórico completo, 
+;; sumando los tiempos de las fases roja, verde y amarilla (en segundos)
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
@@ -113,7 +111,7 @@
 ;; ========================================================
 ;; FUNCIÓN: ciclos-por-tiempo:
 ;; NATURALEZA: Pura (dado el mismo valor en minutos, devuelve el mismo valor matematico)
-;; ESTRATEGIA: trasformacion de valores y calculos matematicos directos  
+;; ESTRATEGIA: Calculos Aritmeticos. 
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
@@ -121,43 +119,64 @@
   (truncate (/ (* minutos 60) 216))
 )
 
-;; Calcula la cantidad de ciclos semafóricos completos en un período dado en minutos.
-;; Se multiplican los minutos por 60 para convertirlos a segundos.
-;; Se divide por 216 y 'truncate' se encarga de descartar la fracción, 
-;; dejando solo la cantidad de ciclos enteros completados.
+;; Calcula la cantidad de ciclos completos en un período (minutos).
+;; El 216 corresponde a las reglas de negocio actuales. La consigna solo
+;; permite recibir 'minutos', por lo que no se puede generalizar con
+;; duracion-ciclo; hubiésemos preferido evitar este hardcodeo para reutilizacion.
 
+;; ========================================================
+;; FUNCIÓN: repartir-resto
+;; NATURALEZA: Pura (a misma entrada, misma salida)
+;; ESTRATEGIA: Recursion de Cola
+;; IMPACTO: No destructiva
+;; ========================================================
+
+(defun repartir-resto (resto duraciones)
+  (cond
+    ((null duraciones) nil)
+    (t (let ((extra (min resto (car duraciones))))
+         (cons extra
+               (repartir-resto (- resto extra) (cdr duraciones)))
+       ))
+  )
+)
+
+;Funcion Auxiliar de distribucion-hora
 
 ;; ========================================================
 ;; FUNCIÓN: distribucion-hora
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: Calculo aritmetico,seguido de impresión formateada.
+;; ESTRATEGIA: Funcion de orden superior (Mapcar) y Calculos arimeticos
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
-(defun distribucion-hora ()
-  (let* ((rojo     90)
-         (verde    120)
-         (amarillo 6)
-         (total    (+ rojo verde amarillo)))
+
+(defun distribucion-hora (rojo verde amarillo)
+  (let* ((duracion    (duracion-ciclo rojo verde amarillo))
+         (ciclos      (truncate (/ 3600 duracion)))
+         (resto       (- 3600 (* ciclos duracion)))
+         (duraciones  (list rojo verde amarillo))
+         (extras      (repartir-resto resto duraciones))
+
+         (nombres     '("Rojo" "Verde" "Amarillo"))
+
+         (totales     (mapcar (lambda (d e) (+ (* ciclos d) e)) duraciones extras)))
     (format t "=== Distribucion Temporal (1 hora) ===~%")
-    (format t "Rojo:     ~,2F%~%" (* (/ (float rojo)     total) 100))
-    (format t "Verde:    ~,2F%~%" (* (/ (float verde)    total) 100))
-    (format t "Amarillo: ~,2F%~%" (* (/ (float amarillo) total) 100))
+    (mapcar (lambda (nombre total)
+              (format t "~A: ~,2F%~%" nombre (* (/ (float total) 3600) 100)))
+            nombres totales)
   )
 )
 
-;; Calcula e imprime el porcentaje de tiempo que ocupa cada color
-;; en un ciclo semaforico, usando las duraciones definidas por las reglas del negocio.
-;; El total del ciclo es la suma de las tres duraciones internas 
-;; Cada porcentaje se obtiene dividiendo la duracion del color por el total
-;; y multiplicando por 100. Se usa float para obtener decimales en lugar de fracciones.
 
+;; Calcula el % de tiempo en rojo, verde y amarillo durante 1 hora,
+;; repartiendo secuencialmente el tiempo sobrante de los ciclos.
 
 ;; ###################### IMPLEMENTACION QUICKLISP ######################
 ;; Nota: No Ejecutar en REPL De Sublime con CLISP sino con SBCL
 ;; Por compatibilidad con QUICKLISP
 
 
-;; Evita conflicto con el símbolo TIMER definido en SBCL (paquete SB-EXT).
+;; SHADOW Evita conflicto con el símbolo TIMER definido en SBCL (paquete SB-EXT).
 ;; Se crea un símbolo local para mantener el nombre exigido por la consigna.
 
 ;; RECORDAR DEFINIR TIMER PARA LLAMAR A auditoria-quicklisp
@@ -174,7 +193,9 @@
   )
 )
 
-;Copia exacta de la funcion timer definida anteriormente
+;Copia exacta de la funcion timer definida anteriormente.
+;Se repite aca para que auditoria-quicklisp funcione al copiar y pegar
+;solo este bloque (sin depender del timer definido mas arriba).
 
 ;; ========================================================
 ;; FUNCIÓN: auditoria-quicklisp
@@ -323,7 +344,7 @@
 ;; ========================================================
 
 (defun timer2 (timestamp)
-  (let ((ciclo (mod timestamp 225)))   ;; 216 pasa a 225
+  (let ((ciclo (mod timestamp 225)))   
     (cond
       ((< ciclo 90)  'en-rojo)
       ((< ciclo 93)  'en-rojo-intermitente)
@@ -334,6 +355,8 @@
     )
   )
 )
+
+;; 216 pasa a 225 (3 Segundos mas por color)
 
 ;; ========================================================
 ;; FUNCIÓN: auditoria2
@@ -357,18 +380,17 @@
 ;; Sin cambios respecto a auditoria: solo se reemplaza timer por timer2.
 
 ;; ========================================================
-;; FUNCIÓN: duracion-ciclo
-;; NATURALEZA: Pura(dado su entrada en segundos solo devuelve el mismo valor matematico, 
-;;en este caso el valor de los segundos)
-;; ESTRATEGIA: Recibe la entrada en segundos de la duracion de cada color y las suma para obtener la duracion total del ciclo
+;; FUNCIÓN: duracion-ciclo2
+;; NATURALEZA: Pura(dado su entrada en segundos solo devuelve el mismo valor matematico)
+;; ESTRATEGIA: Calculo Aritmetico
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
-;pendiente, MODIFICAR
-
-(defun duracion-ciclo (segundos-rojo segundos-verde segundos-amarillo)
+(defun duracion-ciclo2 (segundos-rojo segundos-verde segundos-amarillo)
   (+ segundos-rojo segundos-verde segundos-amarillo)
   )
+
+;; Sin cambios respecto a duracion-ciclo
 
 ;; ========================================================
 ;; FUNCIÓN: recomendacion-ciclo
@@ -388,31 +410,62 @@
 ;; Sin cambios respecto a recomendacion-ciclo
 
 ;; ========================================================
-;; FUNCIÓN: ciclos-por-tiempo:
+;; FUNCIÓN: ciclos-por-tiempo2
 ;; NATURALEZA: Pura (dado el mismo valor en minutos, devuelve el mismo valor matematico)
 ;; ESTRATEGIA: trasformacion de valores y calculos matematicos directos  
 ;; IMPACTO: No destructiva
 ;; ========================================================
 
 (defun ciclos-por-tiempo2 (minutos)
-  (truncate (/ (* minutos 60) 225)) ;; 216 pasa a 225
+  (truncate (/ (* minutos 60) 225))
 )
 
+;; Calcula la cantidad de ciclos completos en un período (minutos).
+;; El 225 corresponde a las reglas de negocio actuales con los estados
+;; intermitentes (90+3+120+3+6+3). Misma limitación que ciclos-por-tiempo:
+;; la consigna solo permite recibir 'minutos'.
+
 ;; ========================================================
-;; FUNCIÓN: distribucion-hora
+;; FUNCIÓN: repartir-resto2
+;; NATURALEZA: Pura (a misma entrada, misma salida)
+;; ESTRATEGIA: Recursion de Cola
+;; IMPACTO: No destructiva
+;; ========================================================
+
+(defun repartir-resto2 (resto duraciones)
+  (cond
+    ((null duraciones) nil)
+    (t (let ((extra (min resto (car duraciones))))
+         (cons extra
+               (repartir-resto2 (- resto extra) (cdr duraciones)))
+       ))
+  )
+)
+;; Sin cambios respecto a repartir-resto: la lógica es genérica
+;; (funciona para una lista de cualquier largo), se repite el
+;; nombre con el sufijo 2 para mantener la convención de la
+;; segunda iteración.
+
+;; ========================================================
+;; FUNCIÓN: distribucion-hora2
 ;; NATURALEZA: Impura (produce efectos secundarios: imprime en terminal)
-;; ESTRATEGIA: Calculo aritmetico,seguido de impresión formateada.
+;; ESTRATEGIA: Funcion de orden superior (Mapcar) y Calculos aritmeticos
 ;; IMPACTO: No destructiva (no modifica estructuras en memoria)
 ;; ========================================================
-(defun distribucion-hora2 ()
-  (let* ((rojo     90)
-         (verde    120)
-         (amarillo 6)
-         (total    (+ rojo verde amarillo)))
+(defun distribucion-hora2 (rojo verde amarillo)
+  (let* ((interm      3)  ;; regla de negocio actual: cada intermitente dura 3 seg
+         (duracion    (duracion-ciclo2 (+ rojo interm) (+ verde interm) (+ amarillo interm)))
+         (ciclos      (truncate (/ 3600 duracion)))
+         (resto       (- 3600 (* ciclos duracion)))
+         (duraciones  (list rojo interm verde interm amarillo interm))
+         (extras      (repartir-resto2 resto duraciones))
+         (nombres     '("Rojo" "Rojo intermitente" "Verde" "Verde intermitente"
+                        "Amarillo" "Amarillo intermitente"))
+         (totales     (mapcar (lambda (d e) (+ (* ciclos d) e)) duraciones extras)))
     (format t "=== Distribucion Temporal (1 hora) ===~%")
-    (format t "Rojo:     ~,2F%~%" (* (/ (float rojo)     total) 100))
-    (format t "Verde:    ~,2F%~%" (* (/ (float verde)    total) 100))
-    (format t "Amarillo: ~,2F%~%" (* (/ (float amarillo) total) 100))
+    (mapcar (lambda (nombre total)
+              (format t "~A: ~,2F%~%" nombre (* (/ (float total) 3600) 100)))
+            nombres totales)
   )
 )
 
@@ -426,7 +479,6 @@
 ;; ESTRATEGIA: Selección por condición (Compara colores mediante if y formatea timestamp con local-time)
 ;; IMPACTO: No destructiva (No modifica estructuras en memoria)
 ;; ========================================================
-
 
 (ql:quickload "local-time")
 
