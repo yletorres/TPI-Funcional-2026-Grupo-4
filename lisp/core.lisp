@@ -125,7 +125,7 @@
 ;; duracion-ciclo; hubiésemos preferido evitar este hardcodeo para reutilizacion.
 
 ;; ========================================================
-;; FUNCIÓN: repartir-resto
+;; FUNCIÓN: repartir-resto  (auxiliar)
 ;; NATURALEZA: Pura (a misma entrada, misma salida)
 ;; ESTRATEGIA: Recursion de Cola
 ;; IMPACTO: No destructiva
@@ -224,65 +224,114 @@
 )
 
 ;; ========================================================
-;; CASOS DE PRUEBA
+;; CASOS DE PRUEBA: Requerimiento 7
 ;; ASEGURAMIENTO DE LA CALIDAD 
 ;; ========================================================
 
 ;; TRANSICION
-;; Normal:
+;; Normal (transicion valida de rojo a verde):
 ;; (transicion 'en-rojo 'verde)
-;; Alternativo:
+
+;; Alternativo (transicion valida de verde a amarillo):
 ;; (transicion 'en-verde 'amarillo)
-;; Error:
+
+;; Caso de entrada invalida (NO genera error: el cond cae en el
+;; caso por defecto 't' y devuelve (10 ACCION-POR-DEFECTO) de forma
+;; silenciosa, sin validar que color-actual sea un color valido):
 ;; (transicion 10 'verde)
 
+;; Error real (cantidad incorrecta de argumentos):
+;; (transicion 'en-rojo)
+
+;; ========================================================
+
 ;; TIMER
-;; Normal:
+;; Normal (ciclo de 50 segundos, cae en el rango rojo):
 ;; (timer 50)
-;; Alternativo:
+
+;; Alternativo (ciclo de 200 segundos, cae en el rango verde):
 ;; (timer 200)
-;; Error:
+
+;; Error (mod no acepta strings, genera TYPE-ERROR):
 ;; (timer "hola")
 
-;; AUDITORIA
-;; Normal:
+;; ========================================================
+
+;; AUDITORIA (aplica tambien para AUDITORIA-QUICKLISP, misma logica,
+;; solo cambia el formato del timestamp en el mensaje impreso)
+
+;; Normal (hay cambio de color de rojo a verde en t=90, imprime mensaje):
 ;; (auditoria 90)
-;; Alternativo:
+
+;; Alternativo (no hay cambio de color: timer(49) = timer(50) = en-rojo,
+;; por lo que la funcion no imprime nada y devuelve NIL):
 ;; (auditoria 50)
-;; Error:
+
+;; Error (- no acepta strings, genera TYPE-ERROR):
 ;; (auditoria "abc")
 
+;; ========================================================
+
 ;; DURACION-CICLO
-;; Normal:
-;; (duracion-ciclo 432)
-;; Alternativo:
-;; (duracion-ciclo 216)
-;; Error:
-;; (duracion-ciclo "texto")
+;; Normal (suma de los tres tiempos: 90+120+6 = 216):
+;; (duracion-ciclo 90 120 6)
+
+;; Alternativo (otro ciclo posible, todos los tiempos iguales: 30+30+30 = 90):
+;; (duracion-ciclo 30 30 30)
+
+;; Error (+ no acepta strings, genera TYPE-ERROR):
+;; (duracion-ciclo "texto" 120 6)
+
+;; ========================================================
 
 ;; RECOMENDACION-CICLO
-;; Normal:
+;; Normal (duracion < 35, recomienda aumentar):
 ;; (recomendacion-ciclo 20)
-;; Alternativo:
-;; (recomendacion-ciclo 100)
-;; Error:
+
+;; Alternativo (duracion > 150, recomienda reducir):
+;; (recomendacion-ciclo 200)
+
+;; Error (< no acepta strings, genera TYPE-ERROR):
 ;; (recomendacion-ciclo "error")
 
+;; ========================================================
+
 ;; CICLOS-POR-TIEMPO
-;; Normal:
+;; Normal (15 minutos, 4 ciclos completos):
 ;; (ciclos-por-tiempo 15)
-;; Alternativo:
+
+;; Alternativo (30 minutos, 8 ciclos completos):
 ;; (ciclos-por-tiempo 30)
-;; Error:
+
+;; Error (* no acepta strings, genera TYPE-ERROR):
 ;; (ciclos-por-tiempo "quince")
 
+;; ========================================================
+
+;; REPARTIR-RESTO (funcion auxiliar de distribucion-hora)
+;; Normal (resto=144 se reparte: 90 al rojo, 54 al verde, 0 al amarillo):
+;; (repartir-resto 144 '(90 120 6))
+
+;; Alternativo (resto=0, no hay nada para repartir, devuelve ceros):
+;; (repartir-resto 0 '(30 30 30))
+
+;; Error (min no acepta strings, genera TYPE-ERROR):
+;; (repartir-resto "10" '(90 120 6))
+
+;; ========================================================
+
 ;; DISTRIBUCION-HORA
-;; Normal:
+;; Normal (ciclo de 216s, sobran 144s que se reparten primero al rojo
+;; y luego al verde):
+
 ;; (distribucion-hora 90 120 6)
-;; Alternativo:
+;; Alternativo (ciclo de 90s, divide exacto a 3600: no hay resto que
+;; repartir, los tres colores quedan en 33.33%):
 ;; (distribucion-hora 30 30 30)
-;; Error:
+
+;; Error (duracion-ciclo hace + sobre "rojo", genera TYPE-ERROR):
 ;; (distribucion-hora "rojo" 120 6)
+
 
 ;; ========================================================
 ;; Segunda Iteracion
@@ -501,7 +550,122 @@
 ;; Sin cambios respecto a auditoria-quicklisp: solo se reemplaza timer por timer2.
 
 ;; ========================================================
-;; Extension 2 
+;; CASOS DE PRUEBA: Requerimiento 7 - ITERACION 2
+;; ASEGURAMIENTO DE LA CALIDAD 
+;; Nota: Las funciones de la iteracion 1 (transicion, timer, auditoria,
+;; duracion-ciclo, recomendacion-ciclo, ciclos-por-tiempo, repartir-resto,
+;; distribucion-hora) no fueron modificadas, por lo que sus casos de
+;; prueba ya documentados siguen siendo validos sin cambios.
+;; ========================================================
+
+;; ========================================================
+;; TRANSICION2
+;; Normal (rojo avisa antes de pasar a verde mediante el intermitente):
+;; (transicion2 'en-rojo 'en-rojo-intermitente)
+
+;; Alternativo (verde avisa antes de pasar a amarillo):
+;; (transicion2 'en-verde 'en-verde-intermitente)
+
+;; Caso de entrada invalida (NO genera error: cae en el caso por
+;; defecto 't' y devuelve (10 ACCION-POR-DEFECTO) de forma silenciosa):
+;; (transicion2 10 'verde)
+
+;; Error real (cantidad incorrecta de argumentos):
+;; (transicion2 'en-rojo)
+;; ========================================================
+
+;; ========================================================
+;; TIMER2
+;; Normal (ciclo de 50 segundos, cae en el rango rojo, igual que timer):
+;; (timer2 50)
+
+;; Alternativo (ciclo de 200 segundos, cae en el rango verde):
+;; (timer2 200)
+
+;; Error (mod no acepta strings, genera TYPE-ERROR):
+;; (timer2 "hola")
+;; ========================================================
+
+;; ========================================================
+;; AUDITORIA2 (aplica tambien para AUDITORIA-QUICKLISP2, misma logica,
+;; solo cambia el formato del timestamp en el mensaje impreso)
+
+;; Normal (hay cambio de color en t=90: pasa de en-rojo a
+;; en-rojo-intermitente, imprime mensaje):
+;; (auditoria2 90)
+
+;; Alternativo (no hay cambio de color: timer2(49) = timer2(50) = en-rojo,
+;; por lo que la funcion no imprime nada y devuelve NIL):
+;; (auditoria2 50)
+
+;; Error (- no acepta strings, genera TYPE-ERROR):
+;; (auditoria2 "abc")
+;; ========================================================
+
+;; ========================================================
+;; DURACION-CICLO2
+;; Normal (suma de los tres tiempos: 90+120+6 = 216):
+;; (duracion-ciclo2 90 120 6)
+
+;; Alternativo (otro ciclo posible, todos los tiempos iguales: 30+30+30 = 90):
+;; (duracion-ciclo2 30 30 30)
+
+;; Error (+ no acepta strings, genera TYPE-ERROR):
+;; (duracion-ciclo2 "texto" 120 6)
+;; ========================================================
+
+;; ========================================================
+;; RECOMENDACION-CICLO2
+;; Normal (duracion < 35, recomienda aumentar):
+;; (recomendacion-ciclo2 20)
+
+;; Alternativo (duracion > 150, recomienda reducir):
+;; (recomendacion-ciclo2 200)
+
+;; Error (< no acepta strings, genera TYPE-ERROR):
+;; (recomendacion-ciclo2 "error")
+;; ========================================================
+
+;; ========================================================
+;; CICLOS-POR-TIEMPO2
+;; Normal (15 minutos -> 900 seg / 225 = 4 ciclos completos):
+;; (ciclos-por-tiempo2 15)
+
+;; Alternativo (30 minutos -> 1800 seg / 225 = 8 ciclos completos exactos):
+;; (ciclos-por-tiempo2 30)
+
+;; Error (* no acepta strings, genera TYPE-ERROR):
+;; (ciclos-por-tiempo2 "quince")
+;; ========================================================
+
+;; ========================================================
+;; REPARTIR-RESTO2 (funcion auxiliar de distribucion-hora2)
+;; Normal (resto=144 sobre la lista (90 3 120 3 6 3): se reparte
+;; 90 al rojo, 3 al intermitente, 51 al verde, y 0 al resto):
+
+;; (repartir-resto2 144 '(90 3 120 3 6 3))
+
+;; Alternativo (resto=0, no hay nada para repartir, devuelve solo ceros):
+;; (repartir-resto2 0 '(30 3 30 3 30 3))
+
+;; Error (min no acepta strings, genera TYPE-ERROR):
+;; (repartir-resto2 "10" '(90 3 120 3 6 3))
+;; ========================================================
+
+;; ========================================================
+;; DISTRIBUCION-HORA2
+
+;; Normal (rojo=30 verde=30 amarillo=30, ciclo de 99s con intermitentes:
+;; 3600/99 = 36 ciclos y sobran 36s, que se reparten entre rojo,
+;; rojo-intermitente y verde):
+;; (distribucion-hora2 30 30 30)
+
+;; Alternativo (rojo=90 verde=120 amarillo=6, ciclo de 225s: 3600/225 = 16
+;; ciclos exactos, no sobra resto para repartir, las extras son todas cero):
+;; (distribucion-hora2 90 120 6)
+
+;; Error (duracion-ciclo2 hace + sobre "rojo", genera TYPE-ERROR):
+;; (distribucion-hora2 "rojo" 120 6)
 ;; ========================================================
 
 ;; ========================================================
@@ -510,6 +674,7 @@
 ;; ESTRATEGIA: Selección por condición (escribe en archivo solo si hay transición mediante if)
 ;; IMPACTO: No destructiva en memoria, pero modifica el archivo informe-ejecucion-semaforo.txt
 ;; ========================================================
+
 
 (defun informe (timestamp)
   (with-open-file (stream "informe-ejecucion-semaforo.txt"
@@ -526,6 +691,67 @@
                             " " (:hour 2) ":" (:min 2) ":" (:sec 2)))
                 color-anterior
                 color-actual)))))
+
+
+;; ========================================================
+;; INFORME (Ejemplos de ejecucion)
+;; NOTA: esta funcion usa internamente 'timer' (de la iteracion 1), no
+;; 'timer2', por lo que los cambios de color que registra corresponden
+;; al ciclo de la iteracion 1.
+
+;; Normal (hay cambio de color en t=90, escribe una linea en el archivo
+;; informe-ejecucion-semaforo.txt):
+;; (informe 90)
+
+;; Alternativo (no hay cambio de color: timer(49) = timer(50), no escribe
+;; nada en el archivo y devuelve NIL):
+;; (informe 50)
+
+;; Error (- no acepta strings, genera TYPE-ERROR):
+;; (informe "abc")
+;; ========================================================
+
+;; ========================================================
+;; FUNCIÓN: informe2
+;; NATURALEZA: Impura (produce efectos secundarios: escribe en archivo)
+;; ESTRATEGIA: Selección por condición (escribe en archivo solo si hay transición mediante if)
+;; IMPACTO: No destructiva en memoria, pero modifica el archivo informe-ejecucion-semaforo2.txt
+;; ========================================================
+
+(defun informe2 (timestamp)
+  (with-open-file (stream "informe-ejecucion-semaforo2.txt"
+                          :direction :output
+                          :if-exists :append
+                          :if-does-not-exist :create)
+    (let ((color-anterior (timer2 (- timestamp 1)))
+          (color-actual   (timer2 timestamp)))
+      (if (not (equal color-anterior color-actual))
+        (format stream "~A - Transicion: ~A -> ~A~%"
+                (local-time:format-timestring nil
+                  (local-time:unix-to-timestamp timestamp)
+                  :format '((:year 4) "-" (:month 2) "-" (:day 2)
+                            " " (:hour 2) ":" (:min 2) ":" (:sec 2)))
+                color-anterior
+                color-actual)))))
+
+;; Sin cambios respecto a informe: solo se reemplaza timer por timer2 y
+;; el archivo de salida se renombra a "informe-ejecucion-semaforo2.txt"
+;; para no mezclar los registros de la iteracion 1 con los de la
+;; iteracion 2 (que ahora incluyen tambien los estados intermitentes).
+
+
+;; ========================================================
+;; INFORME2 (Ejemplos de Ejecucion)
+;; Normal (hay cambio de color en t=90: timer2 pasa de en-rojo a
+;; en-rojo-intermitente, escribe una linea en
+;; informe-ejecucion-semaforo2.txt):
+;; (informe2 90)
+;; Alternativo (no hay cambio de color: timer2(49) = timer2(50) = en-rojo,
+;; no escribe nada en el archivo y devuelve NIL):
+;; (informe2 50)
+;; Error (- no acepta strings, genera TYPE-ERROR):
+;; (informe2 "abc")
+;; ========================================================
 
 
 ;; ========================================================
@@ -571,3 +797,67 @@
      (sleep 1)
      (ejecutar-sistema (- segundos-restantes 1))))) 
 
+;; ========================================================
+;; FUNCIÓN: ejecutar-sistema2
+;; NATURALEZA: Impura (produce efectos secundarios: escribe en archivo, espera con sleep)
+;; ESTRATEGIA: Recursividad de cola (se llama a sí misma decrementando segundos-restantes)
+;; IMPACTO: No destructiva en memoria, pero modifica el archivo informe-ejecucion-semaforo2.txt
+;; ========================================================
+
+(defun ejecutar-sistema2 (segundos-restantes)
+  (cond
+    ((<= segundos-restantes 0) nil)
+    (t
+     (informe2 (universal-a-unix (get-universal-time)))
+     (sleep 1)
+     (ejecutar-sistema2 (- segundos-restantes 1)))))
+
+;; Sin cambios respecto a ejecutar-sistema: solo se reemplaza informe por
+;; informe2, que internamente usa timer2 (con los estados intermitentes)
+;; y escribe en "informe-ejecucion-semaforo2.txt". Se reutiliza
+;; universal-a-unix sin cambios, ya que la conversion entre epocas
+;; (Common Lisp -> Unix) no depende de la version del semaforo.
+
+;; Casos de prueba de funciones extra
+
+;; ========================================================
+;; UNIVERSAL-A-UNIX
+;; Normal (convierte un tiempo universal a su equivalente unix):
+;; (universal-a-unix 3912280800)  -> 1703292000
+
+;; Alternativo (con el tiempo actual del sistema):
+;; (universal-a-unix (get-universal-time))
+
+;; Error (- no acepta strings, genera TYPE-ERROR):
+;; (universal-a-unix "abc")
+;; ========================================================
+
+;; ========================================================
+;; EJECUTAR-SISTEMA
+;; Normal (corre el ciclo durante 120 segundos, escribiendo en
+;; informe-ejecucion-semaforo.txt cada vez que cambia el color
+;; segun timer):
+;; (ejecutar-sistema 120)
+
+;; Alternativo (segundos-restantes = 0, no hace nada y devuelve NIL
+;; sin escribir ni esperar, caso base de la recursion):
+;; (ejecutar-sistema 0)
+
+;; Error (cantidad incorrecta de argumentos):
+;; (ejecutar-sistema)
+;; ========================================================
+
+;; ========================================================
+;; EJECUTAR-SISTEMA2
+;; Normal (corre el ciclo durante 5 segundos, escribiendo en
+;; informe-ejecucion-semaforo2.txt cada vez que cambia el color
+;; segun timer2, incluyendo los estados intermitentes):
+;; (ejecutar-sistema2 5)
+
+;; Alternativo (segundos-restantes = 0, no hace nada y devuelve NIL
+;; sin escribir ni esperar, caso base de la recursion):
+;; (ejecutar-sistema2 0)
+
+;; Error (cantidad incorrecta de argumentos):
+;; (ejecutar-sistema2)
+;; ========================================================
