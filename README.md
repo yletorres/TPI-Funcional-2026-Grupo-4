@@ -1,3 +1,4 @@
+![Image](https://github.com/user-attachments/assets/8ad4d870-508c-45e9-adb6-417659eb8480)
 # Sistema de Semáforos Inteligentes
 
 ### Trabajo Práctico Integrador 2026 — Paradigmas y Lenguajes de Programación
@@ -31,7 +32,7 @@ Además, incluye una implementación comparativa en **OCaml**, junto con el info
 
 ### 🎥 Video demostración del sistema
 
-[Enlace pendiente]
+[(https://youtu.be/hh552Fff0yY?si=TJ0DU0AJLKby50Md)]
 
 ---
 
