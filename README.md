@@ -1,4 +1,7 @@
-![Image](https://github.com/user-attachments/assets/8ad4d870-508c-45e9-adb6-417659eb8480)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8ad4d870-508c-45e9-adb6-417659eb8480">
+</p>
+
 # Sistema de Semáforos Inteligentes
 
 ### Trabajo Práctico Integrador 2026 — Paradigmas y Lenguajes de Programación
